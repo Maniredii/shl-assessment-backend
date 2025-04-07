@@ -1,18 +1,17 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 import os
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def home():
-    return {"status": "success", "message": "Backend API is running"}
+    return jsonify({"status": "success", "message": "Backend is running"})
 
-@app.route('/health')
-def health_check():
-    return {"status": "healthy"}
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "healthy"})
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 8000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 8000)))
