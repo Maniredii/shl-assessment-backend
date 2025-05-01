@@ -19,21 +19,27 @@ CORS(app, resources={
     r"/*": {
         "origins": [
             "https://shl-assessment-nine.vercel.app",
-            "http://localhost:3000"
+            "http://localhost:3000",
+            "https://shl-assessment-nine.vercel.app/"
         ],
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "allow_headers": ["Content-Type", "Authorization", "Origin"],
+        "max_age": 3600
     }
 })
 
 # Add CORS headers to all responses
 @app.after_request
 def add_cors_headers(response):
-    if request.method == 'OPTIONS':
+    origin = request.headers.get('Origin')
+    if origin in ["https://shl-assessment-nine.vercel.app", "http://localhost:3000"]:
+        response.headers['Access-Control-Allow-Origin'] = origin
+    else:
         response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-        response.headers['Access-Control-Max-Age'] = '3600'
+        
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, Origin'
+    response.headers['Access-Control-Max-Age'] = '3600'
     return response
 
 # Error handler for all exceptions
