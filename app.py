@@ -262,8 +262,8 @@ def recommend_tests():
 if __name__ == '__main__':
     logger.info("Starting SHL Test Recommender API...")
     try:
-        # Use environment variable for port with fallback to 5000
-        port = int(os.environ.get('PORT', 5000))
+        # Use environment variable for port with fallback to 10000
+        port = int(os.environ.get('PORT', 10000))
         # In production, bind to all interfaces
         app.run(host='0.0.0.0', port=port)
         logger.info(f"Server started successfully on port {port}")
