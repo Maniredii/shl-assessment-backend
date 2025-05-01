@@ -14,33 +14,16 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Configure CORS with specific origins
-CORS(app, resources={
-    r"/*": {
-        "origins": [
-            "https://shl-assessment-nine.vercel.app",
-            "http://localhost:3000",
-            "https://shl-assessment-nine.vercel.app/"
-        ],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "Origin"],
-        "max_age": 3600
-    }
-})
-
-# Add CORS headers to all responses
-@app.after_request
-def add_cors_headers(response):
-    origin = request.headers.get('Origin')
-    if origin in ["https://shl-assessment-nine.vercel.app", "http://localhost:3000"]:
-        response.headers['Access-Control-Allow-Origin'] = origin
-    else:
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, Origin'
-    response.headers['Access-Control-Max-Age'] = '3600'
-    return response
+# Simple CORS configuration
+CORS(app, 
+     resources={
+         r"/*": {
+             "origins": ["https://shl-assessment-nine.vercel.app"],
+             "methods": ["GET", "POST", "OPTIONS"],
+             "allow_headers": ["Content-Type"],
+             "supports_credentials": False
+         }
+     })
 
 # Error handler for all exceptions
 @app.errorhandler(Exception)
@@ -223,12 +206,17 @@ def home():
         'message': 'SHL Test Recommender API is running'
     })
 
-@app.route('/api/recommend', methods=['POST', 'OPTIONS'])
+@app.route('/recommend', methods=['POST', 'OPTIONS'])
 def recommend_tests():
+    # Handle preflight requests
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers['Access-Control-Allow-Origin'] = 'https://shl-assessment-nine.vercel.app'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response, 200
+        
     try:
-        if request.method == 'OPTIONS':
-            return '', 204  # Return empty response for preflight requests
-            
         logger.debug(f"Received request: {request.data}")
         data = request.json
         
