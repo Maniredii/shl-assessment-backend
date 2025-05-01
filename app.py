@@ -6,6 +6,7 @@ import json
 import re
 import logging
 from typing import List, Dict, Tuple
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -13,15 +14,26 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Simple CORS configuration
-CORS(app)
+# Configure CORS with specific origins
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://shl-assessment-nine.vercel.app",
+            "http://localhost:3000"
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Add CORS headers to all responses
 @app.after_request
 def add_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    if request.method == 'OPTIONS':
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        response.headers['Access-Control-Max-Age'] = '3600'
     return response
 
 # Error handler for all exceptions
@@ -250,9 +262,11 @@ def recommend_tests():
 if __name__ == '__main__':
     logger.info("Starting SHL Test Recommender API...")
     try:
-        # Bind to localhost for security
-        app.run(host='127.0.0.1', port=5000, debug=True)
-        logger.info("Server started successfully on port 5000")
+        # Use environment variable for port with fallback to 5000
+        port = int(os.environ.get('PORT', 5000))
+        # In production, bind to all interfaces
+        app.run(host='0.0.0.0', port=port)
+        logger.info(f"Server started successfully on port {port}")
     except Exception as e:
         logger.error(f"Failed to start server: {str(e)}")
         exit(1) 
