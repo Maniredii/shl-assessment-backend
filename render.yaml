@@ -8,4 +8,6 @@ services:
       - key: PYTHON_VERSION
         value: 3.9.0
       - key: PORT
-        value: 8000 
+        value: 8000
+      - key: FLASK_ENV
+        value: production 
